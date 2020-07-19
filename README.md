@@ -20,7 +20,7 @@
 
   `git remove -v`
 
-## JAWSDB Setup (with Sequelize)
+## JawsDB Setup (with Sequelize)
 
 - From the Overview tab on the Heroku app, select "Configure Add-ons"
 - Search for JawsDB MySQL and attach the add-on
@@ -63,6 +63,8 @@ app.get("/", passport.authenticate("github"), function (req, res) {
 ```
 
 ## Options for testing locally
+
+_After changes made to deploy to Heroku_
 
 1. In server.js, update `clientID` and `clientSecret` to be hardcoded string values; return to `process.env.clientID` and `process.env.clientSecret` prior to pushing changes
 
