@@ -10,7 +10,7 @@
 6. Navigate to your repo in the terminal
 7. View remotes, there should be no heroku remotes yet, just origin from github: `git remote -v`
 8. Create a remote for your app: `heroku git:remote -a [heroku app name]`
-9. Verify you see a heroku remote; `git remove -v`
+9. Verify you see a heroku remote; `git remote -v`
 
 ## OAuth Setup
 
