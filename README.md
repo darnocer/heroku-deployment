@@ -1,6 +1,19 @@
-# Heroku Deployment Tips
+Deploying to Heroku can be tricky. Here are some tips to get your deployed application working!
+From [DEV](https://dev.to/darnocer/heroku-deployment-tips-3lii)
 
-## Creating a Heroku app using the GUI
+---
+
+## Table of Contents
+
+- [Deployment](#Deployment)
+- [OAuth](#OAuth)
+- [JawsDB for MySQL](#JawsDB-for-MySQL)
+- [MongoDB Atlas for MongoDB](#MongoDB-Atlas-for-MongoDB)
+
+---
+
+## Deployment
+_Creating a Heroku app using the GUI_
 
 1. Navigate to your Heroku account
 2. Click New > Create new app and enter a name for the app
@@ -12,7 +25,7 @@
 8. Create a remote for your app: `heroku git:remote -a [heroku app name]`
 9. Verify you see a heroku remote; `git remote -v`
 
-## OAuth Setup
+## OAuth
 
 1. Add the `clientID` and `clientSecret` as keys with the corresponding values in Config Vars on Heroku
 2. In the OAuth app, add the Heroku URL as the Homepage and Callback URL
@@ -38,19 +51,18 @@ app.get("/", passport.authenticate("github"), function (req, res) {
 
 _After changes made to deploy to Heroku_
 
-* In server.js, update `clientID` and `clientSecret` to be hardcoded string values; return to `process.env.clientID` and `process.env.clientSecret` prior to pushing changes
+- In server.js, update `clientID` and `clientSecret` to be hardcoded string values; return to `process.env.clientID` and `process.env.clientSecret` prior to pushing changes
 
-* Create a new OAuth app and configure for `localhost`. Setup the `clientID` and `clientSecret` to use `process.env` on Heroku, but the localhost configured app otherwise:
+- Create a new OAuth app and configure for `localhost`. Setup the `clientID` and `clientSecret` to use `process.env` on Heroku, but the localhost configured app otherwise:
 
 ```
 clientID: process.env.clientID || [new_locahost_clientID_here],
 clientSecret: process.env.clientSecret || [new_localhost_clientSecret_here],
 ```
 
-* Create a `.env` file, add `clientID="{clientID}"` and `clientSecret="{clientSecret}"`. Be sure to add `.env` to `.gitignore`. `npm i dotenv`and follow `dotenv` setup instructions
+- Create a `.env` file, add `clientID="{clientID}"` and `clientSecret="{clientSecret}"`. Be sure to add `.env` to `.gitignore`. `npm i dotenv`and follow `dotenv` setup instructions
 
-
-## JawsDB Setup (with Sequelize)
+## JawsDB for MySQL
 
 1. From the Overview tab on the Heroku app, select "Configure Add-ons"
 2. Search for JawsDB MySQL and attach the add-on
@@ -70,13 +82,16 @@ clientSecret: process.env.clientSecret || [new_localhost_clientSecret_here],
   }
 ```
 
-## mLab Setup (with Mongoose)
+## mLab for MongoDB / Mongoose 
+_mLab is now depreciated. Use MongoDB Atlas (below) instead.  
+
 1. Run this command to provision mLab to the app:
-`heroku addons:create mongolab`
+   `heroku addons:create mongolab`
 2. Navigate to Heroku app and verify the mLab add-on is provisioned
 3. Navigate to Settings > Config vars and verify there is a `MONGODB_URL` config variable
 4. Ensure `mongoose` is required in `server.js`
-4. Update Mongoose connection in `server.js` to be the following:
+5. Update Mongoose connection in `server.js` to be the following:
+
 ```
 var MONGODB_URI = process.env.MONGODB_URI || "mongodb://localhost/db_name";
 const options = {
@@ -86,4 +101,42 @@ const options = {
 };
 
 mongoose.connect(MONGODB_URI,options)
+```
+
+## MongoDB Atlas for MongoDB
+### MongoDB Atlas Account
+1. Create your [MongoDB Atlas](https://www.mongodb.com/cloud/atlas/signup) account
+2. Create a new "cluster"
+3. Select the free tier
+4. Can use any provider - such as AWS
+5. Choose the server in the region in the free tier closest to you
+6. After creating the cluster, in the cluster, go to Security > Database Access
+7. +Add new database user
+8. Add username/password 
+9. Change privileges to Atlas Admin
+10. Go to Security > Network Access
+11. Go to Add IP Address and select Allow Access from Anywhere
+12. Go to Clusters > Collections > Add My Own Data
+13. Add your database name and one collection name (only need to add one to get started even if you have multiple collections since they will be created by Mongoose)
+
+### Connecting MongoDB Atlas to Heroku
+1. Click the Connect button in your cluster
+2. Select Connect Your Application and choose Heorku
+3. Copy the string
+4. Go to your app in Heroku > Settings > Config Vars
+5. Enter MONGODB_URI in the key
+6. For the value, paste the string you copied from MongoDB Atlas
+7. Update the username/password and database name in the string to match what you created in the MongoDB Atlas Setup
+8. Ensure you look to MONGODB_URI in you Mongoose connection (likely in server.js)
+
+```
+mongoose.connect(
+  process.env.MONGODB_URI || "mongodb://localhost/databasename",
+  {
+    useUnifiedTopology: true,
+    useNewUrlParser: true,
+    useCreateIndex: true,
+    useFindAndModify: false,
+  }
+);
 ```
